@@ -1,87 +1,68 @@
 #include "screen.hpp"
-#include <stdio.h>
-#include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include <sys/ioctl.h>
 #include <stdexcept>
-#include <string.h>
-#include <errno.h>
+#include <cstring>
+#include <cerrno>
 
-// 构造函数定义
-Screen::Screen(const char *name) : _name(name), _w(800), _h(480), _bpp(32)
-{
-    _fd = ::open(_name, O_RDWR);
-    if (_fd == -1)
+Screen::Screen(const char* device) {
+    // 打开framebuffer设备
+    _fbFd = open(device, O_RDWR);
+    if (_fbFd == -1) {
         throw std::runtime_error(std::string("open fb0 error: ") + strerror(errno));
-
-    // 映射
-    _addr = (int *)mmap(NULL, _w * _h * _bpp / 8, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, 0);
-    if (_addr == MAP_FAILED)
-    {
-        perror("mmap error");
-        exit(1);
     }
-    printf("fb0 init success!\n");
-}
 
-// 拷贝构造函数定义
-Screen::Screen(const Screen &rhs)
-{
-    this->_name = rhs._name;
-    this->_w = rhs._w;
-    this->_h = rhs._h;
-    this->_bpp = rhs._bpp;
-
-    _fd = ::open(_name, O_RDWR);
-    if (_fd == -1)
-        throw std::runtime_error(std::string("open fb0 error: ") + strerror(errno));
-
-    // 映射
-    _addr = (int *)mmap(NULL, _w * _h * _bpp / 8, PROT_READ | PROT_WRITE, MAP_SHARED, _fd, 0);
-    if (_addr == MAP_FAILED)
-    {
-        perror("mmap error");
-        exit(1);
+    // 获取屏幕信息
+    if (ioctl(_fbFd, FBIOGET_VSCREENINFO, &_varInfo) == -1 ||
+        ioctl(_fbFd, FBIOGET_FSCREENINFO, &_fixInfo) == -1) {
+        throw std::runtime_error("Failed to get screen info");
     }
-    printf("copy fb0 success!\n");
+
+    _width = _varInfo.xres;
+    _height = _varInfo.yres;
+
+    // 映射framebuffer
+    _fbMem = (uint8_t*)mmap(NULL, _fixInfo.smem_len, 
+                           PROT_READ | PROT_WRITE, MAP_SHARED, _fbFd, 0);
+    if (_fbMem == MAP_FAILED) {
+        throw std::runtime_error("mmap failed");
+    }
+
+    // 分配backBuffer
+    _backBuffer = new uint32_t[_width * _height];
 }
 
-// 析构函数定义
-Screen::~Screen()
-{
-    munmap(_addr, _w * _h * _bpp / 8);
-    ::close(_fd);
+Screen::~Screen() {
+    delete[] _backBuffer;
+    munmap(_fbMem, _fixInfo.smem_len);
+    close(_fbFd);
 }
 
-void Screen::draw_point(int x, int y, int color) const
-{
-    // printf("addr = %p \n", _addr);
-    if (x >= 0 and x < _w and y >= 0 and y < _h)
-    {
-        *(_addr + _w * y + x) = color;
+void Screen::clear(uint32_t color) {
+    for (int i = 0; i < _width * _height; i++) {
+        _backBuffer[i] = color;
     }
 }
 
-void Screen::draw_point(const Point &pos, const Color &color) const
-{
-    draw_point(pos.x(), pos.y(), color.value());
-}
-
-void Screen::clear(int color)
-{
-    for (int y = 0; y < _h; y++) {
-        for (int x = 0; x < _w; x++) {
-            *(_addr + _w * y + x) = color;
+void Screen::fill_rect(int x, int y, int w, int h, uint32_t color) {
+    for (int dy = 0; dy < h; dy++) {
+        for (int dx = 0; dx < w; dx++) {
+            int px = x + dx;
+            int py = y + dy;
+            if (px >= 0 && px < _width && py >= 0 && py < _height) {
+                _backBuffer[py * _width + px] = color;
+            }
         }
     }
 }
 
-void Screen::fill_rect(int x, int y, int w, int h, int color)
-{
-    for (int dy = y; dy < y + h && dy < _h; dy++) {
-        for (int dx = x; dx < x + w && dx < _w; dx++) {
-            *(_addr + _w * dy + dx) = color;
-        }
-    }
+void Screen::swap() {
+    // 等待VSync
+    int dummy = 0;
+    ioctl(_fbFd, FBIO_WAITFORVSYNC, &dummy);
+
+    // 复制backBuffer到framebuffer
+    memcpy(_fbMem, _backBuffer, _width * _height * sizeof(uint32_t));
 }

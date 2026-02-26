@@ -3,27 +3,25 @@
 
 #include "point.hpp"
 #include "color.hpp"
+#include <linux/fb.h>
+#include <sys/ioctl.h>
+#include <cstdint>
 
 class Screen
 {
 public:
-    Screen(const char* name); // 构造函数声明
-    Screen(const Screen& rhs); // 拷贝构造函数
-    ~Screen();  // 析构函数声明
-    void init();
-    void draw_point(int x, int y, int color) const; // drawPoint  DrawPoint
-    void draw_point(const Point& pos, const Color& color) const;
-    void clear(int color);
-    void fill_rect(int x, int y, int w, int h, int color);
+    Screen(const char* device);
+    ~Screen();
+    void clear(uint32_t color);
+    void fill_rect(int x, int y, int w, int h, uint32_t color);
+    void swap(); // 把 backBuffer 复制到 fb，并等待 VSync
     
 private:
-    const char* _name;
-    int _fd;
-    int* _addr;
-    int _w;
-    int _h;
-    int _bpp; // 色深
+    uint32_t* _backBuffer;  // 离屏缓冲
+    int _width, _height;
+    int _fbFd;
+    uint8_t* _fbMem;
+    struct fb_var_screeninfo _varInfo;
+    struct fb_fix_screeninfo _fixInfo;
 };
-
 #endif
-

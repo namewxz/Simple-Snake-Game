@@ -11,7 +11,7 @@ class Bitmap
 public:
     Bitmap(std::string name);
     ~Bitmap();
-    void draw(Screen  s) const;
+    void draw(Screen& s) const;
 
 private:
     std::string _name;

@@ -96,6 +96,9 @@ void Game::render() {
     Color foodColor(255, 0, 0); // 红色
     _screen.fill_rect(_food.x(), _food.y(), GRID_SIZE, GRID_SIZE, foodColor.value());
 
+    // 交换缓冲区
+    _screen.swap();
+
     // 游戏状态提示
     if (_state == State::READY) {
         // 显示开始提示
@@ -103,7 +106,6 @@ void Game::render() {
         // 显示游戏结束
     }
 }
-
 
 
 void Game::generateFood() {

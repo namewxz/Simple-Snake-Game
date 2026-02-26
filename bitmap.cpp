@@ -45,7 +45,7 @@ Bitmap::~Bitmap()
     close(_fd);
 }
 
-void Bitmap::draw(Screen s) const
+void Bitmap::draw(Screen& s) const
 {
     // 计算每行的填充字节数
     int pad_bytes = (_w * 24 / 8 % 4 == 0) ? 0 : (4 - _w * 24 / 8 % 4); // 0,1,2,3
@@ -61,7 +61,7 @@ void Bitmap::draw(Screen s) const
             g = *p++;
             r = *p++;
             Color pixelColor(r, g, b);
-            s.draw_point(j, i, pixelColor.value());
+            s.fill_rect(j, i, 1, 1, pixelColor.value());
         }
         // 处理完一行的像素字节后，跳过后面的填充字节
         p += pad_bytes;
