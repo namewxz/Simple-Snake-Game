@@ -184,9 +184,18 @@ void Game::render() {
     
     // 绘制菜单按钮 30x30 黄色 (保持原有按钮位置)
     _screen.fill_rect(611, 428, 30, 30, 0xFFFF00);
+    WordDisplay::displayWord(_screen, 616, 433, 24, 20, WordDisplay::NAME_JIA_FONT, Color(0, 0, 255).value());
     _screen.fill_rect(659, 428, 30, 30, 0xFFFF00);
+    WordDisplay::displayWord(_screen, 664, 433, 24, 20, WordDisplay::NAME_JIAN_FONT, Color(0, 0, 255).value());
     _screen.fill_rect(709, 428, 30, 30, 0xFFFF00);
+    WordDisplay::displayWord(_screen, 714, 433, 24, 20, WordDisplay::NAME_JIA_FONT, Color(0, 0, 255).value());
     _screen.fill_rect(757, 428, 30, 30, 0xFFFF00);
+    WordDisplay::displayWord(_screen, 762, 433, 24, 20, WordDisplay::NAME_JIAN_FONT, Color(0, 0, 255).value());
+    WordDisplay::displayWord(_screen, 630, 460, 24, 20, WordDisplay::NAME_SU_FONT, Color(255, 0, 0).value());
+    WordDisplay::displayWord(_screen, 655, 460, 24, 20, WordDisplay::NAME_DU_FONT, Color(255, 0, 0).value());
+    WordDisplay::displayWord(_screen, 723, 460, 24, 20, WordDisplay::NAME_SHI_FONT, Color(255, 0, 0).value());
+    WordDisplay::displayWord(_screen, 748, 460, 24, 20, WordDisplay::NAME_WU_FONT, Color(255, 0, 0).value());
+
     // 交换缓冲区
     _screen.swap();
 

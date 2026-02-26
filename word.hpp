@@ -10,6 +10,12 @@ public:
     static const uint8_t NUM_FONT[10][24*35/8];
     static const uint8_t NAME_FU_FONT[24*20/8];
     static const uint8_t NAME_TING_FONT[24*20/8];
+    static const uint8_t NAME_JIA_FONT[24*20/8];
+    static const uint8_t NAME_JIAN_FONT[24*20/8];
+    static const uint8_t NAME_SU_FONT[24*20/8];
+    static const uint8_t NAME_DU_FONT[24*20/8];
+    static const uint8_t NAME_SHI_FONT[24*20/8];
+    static const uint8_t NAME_WU_FONT[24*20/8];
     static const uint8_t NUM_1_FONT[16*19/8];
 
     // Display methods
