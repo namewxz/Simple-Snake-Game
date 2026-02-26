@@ -47,6 +47,11 @@ Bitmap::~Bitmap()
 
 void Bitmap::draw(Screen& s) const
 {
+    draw(s, 0, 0);
+}
+
+void Bitmap::draw(Screen& s, int x, int y) const
+{
     // 计算每行的填充字节数
     int pad_bytes = (_w * 24 / 8 % 4 == 0) ? 0 : (4 - _w * 24 / 8 % 4); // 0,1,2,3
 
@@ -57,11 +62,12 @@ void Bitmap::draw(Screen& s) const
     {
         for (int j = 0; j < _w; j++)
         {
-            b = *p++;
-            g = *p++;
-            r = *p++;
-            Color pixelColor(r, g, b);
-            s.fill_rect(j, i, 1, 1, pixelColor.value());
+            uint8_t b = *p++;
+            uint8_t g = *p++;
+            uint8_t r = *p++;
+            // 24位BMP转32位屏幕格式 (ARGB)
+            uint32_t color = (0xFF << 24) | (r << 16) | (g << 8) | b;
+            s.fill_rect(x + j, y + i, 1, 1, color);
         }
         // 处理完一行的像素字节后，跳过后面的填充字节
         p += pad_bytes;

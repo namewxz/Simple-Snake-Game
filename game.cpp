@@ -8,7 +8,8 @@ Game::Game(Screen& screen) :
     _screen(screen), 
     _touch(),
     _state(State::READY),
-    _running(true) {
+    _running(true),
+    _menuBackground("./bmps/snake.bmp") {
     init();
     _inputThread = std::thread(&Game::handleTouchInput, this);
 }
@@ -23,7 +24,7 @@ Game::~Game() {
 void Game::init() {
     std::lock_guard<std::mutex> lock(_mutex);
     _snake.clear();
-    _snake.push_back(Point(WIDTH/2, HEIGHT/2));
+    _snake.push_back(Point(GAME_WIDTH/2, HEIGHT/2));
     _currentDir = Direction::Right;
     _score = 0;
     _foods.clear();
@@ -120,7 +121,8 @@ void Game::render() {
                            x + GRID_SIZE/2, y + GRID_SIZE,
                            foodColor);
     }
-
+    // 绘制菜单背景
+    _menuBackground.draw(_screen, GAME_WIDTH, 0);
     // 交换缓冲区
     _screen.swap();
 
@@ -128,7 +130,12 @@ void Game::render() {
     if (_state == State::READY) {
         // 显示开始提示
     } else if (_state == State::GAME_OVER) {
-        // 显示游戏结束
+        // 清屏并显示游戏结束图片
+        _screen.clear(0);
+        Bitmap gameOverBmp("./bmps/my_game_over.bmp");
+        gameOverBmp.draw(_screen, 0, 0);
+        _screen.swap();
+        return; // 不再绘制其他内容
     }
 }
 
@@ -138,7 +145,7 @@ void Game::generateFood() {
 
     Point newFood;
     do {
-        newFood.setX((rand() % (WIDTH/GRID_SIZE)) * GRID_SIZE);
+        newFood.setX((rand() % (GAME_WIDTH/GRID_SIZE)) * GRID_SIZE);
         newFood.setY((rand() % (HEIGHT/GRID_SIZE)) * GRID_SIZE);
     } while (std::find(_snake.begin(), _snake.end(), newFood) != _snake.end() ||
              std::find(_foods.begin(), _foods.end(), newFood) != _foods.end());
@@ -148,7 +155,7 @@ void Game::generateFood() {
 
 bool Game::checkCollision(const Point& newHead) const {
     // 检查墙壁碰撞
-    if (newHead.x() < 0 || newHead.x() >= WIDTH || 
+    if (newHead.x() < 0 || newHead.x() >= GAME_WIDTH || 
         newHead.y() < 0 || newHead.y() >= HEIGHT) {
         return true;
     }

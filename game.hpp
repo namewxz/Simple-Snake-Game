@@ -4,6 +4,7 @@
 #include "screen.hpp"
 #include "point.hpp"
 #include "touch.hpp"
+#include "bitmap.hpp"
 #include <vector>
 #include <cstdlib>
 #include <thread>
@@ -40,10 +41,13 @@ private:
     std::mutex _mutex;
     std::thread _inputThread;
     bool _running;
+    Bitmap _menuBackground; // 菜单背景图
     static const int GRID_SIZE = 20;
-    static const int WIDTH = 800;
+    static const int GAME_WIDTH = 600; // 游戏区域宽度
+    static const int UI_WIDTH = 200;   // UI区域宽度
+    static const int WIDTH = GAME_WIDTH + UI_WIDTH; // 总宽度800
     static const int HEIGHT = 480;
-    static const int MAX_FOODS = 30; // 同时存在的最大食物数量
+    static const int MAX_FOODS = 3; // 同时存在的最大食物数量
 };
 
 #endif

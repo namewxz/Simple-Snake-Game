@@ -20,6 +20,14 @@ Screen::Screen(const char* device) {
         throw std::runtime_error("Failed to get screen info");
     }
 
+    // 调试输出屏幕信息
+    printf("Screen info:\n");
+    printf("Resolution: %dx%d\n", _varInfo.xres, _varInfo.yres);
+    printf("Bits per pixel: %d\n", _varInfo.bits_per_pixel);
+    printf("Red offset: %d, length: %d\n", _varInfo.red.offset, _varInfo.red.length);
+    printf("Green offset: %d, length: %d\n", _varInfo.green.offset, _varInfo.green.length);
+    printf("Blue offset: %d, length: %d\n", _varInfo.blue.offset, _varInfo.blue.length);
+
     _width = _varInfo.xres;
     _height = _varInfo.yres;
 

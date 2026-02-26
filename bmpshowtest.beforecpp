@@ -43,8 +43,13 @@ int main() {
         
         // 显示第一张图片
         int currentIndex = 0;
+        std::cout << "Loading BMP: " << bmpFiles[currentIndex] << std::endl;
         Bitmap currentBmp(bmpFiles[currentIndex]);
+        std::cout << "BMP loaded, width: " << currentBmp.width() 
+                  << ", height: " << currentBmp.height() << std::endl;
         currentBmp.draw(screen);
+        screen.swap();
+        std::cout << "First BMP drawn and swapped" << std::endl;
         
         // 主循环
         while (true) {
@@ -72,8 +77,13 @@ int main() {
             }
             
             // 显示新图片
+            std::cout << "Loading BMP: " << bmpFiles[currentIndex] << std::endl;
             currentBmp = Bitmap(bmpFiles[currentIndex]);
+            std::cout << "BMP loaded, width: " << currentBmp.width() 
+                      << ", height: " << currentBmp.height() << std::endl;
             currentBmp.draw(screen);
+            screen.swap();
+            std::cout << "BMP drawn and swapped" << std::endl;
             
             // 防止过快切换
             usleep(300000); // 300ms
