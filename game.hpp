@@ -34,7 +34,7 @@ private:
     TouchEvent _touch;
     State _state;
     std::vector<Point> _snake;
-    Point _food;
+    std::vector<Point> _foods;
     Direction _currentDir;
     int _score;
     std::mutex _mutex;
@@ -43,6 +43,7 @@ private:
     static const int GRID_SIZE = 20;
     static const int WIDTH = 800;
     static const int HEIGHT = 480;
+    static const int MAX_FOODS = 30; // 同时存在的最大食物数量
 };
 
 #endif

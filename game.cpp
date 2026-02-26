@@ -26,7 +26,10 @@ void Game::init() {
     _snake.push_back(Point(WIDTH/2, HEIGHT/2));
     _currentDir = Direction::Right;
     _score = 0;
-    generateFood();
+    _foods.clear();
+    for (int i = 0; i < MAX_FOODS; i++) {
+        generateFood();
+    }
     _state = State::PLAYING;
     printf("Game initialized, state: PLAYING\n");
 }
@@ -75,8 +78,10 @@ void Game::update() {
     _snake.insert(_snake.begin(), newHead);
 
     // 检查是否吃到食物
-    if (newHead == _food) {
+    auto foodIt = std::find(_foods.begin(), _foods.end(), newHead);
+    if (foodIt != _foods.end()) {
         _score++;
+        _foods.erase(foodIt);
         generateFood();
     } else {
         _snake.pop_back();
@@ -104,15 +109,17 @@ void Game::render() {
         }
     }
 
-    // 绘制食物 - 蓝色三角形
+    // 绘制食物
     Color foodColor(0, 0, 255);
-    int x = _food.x() + GRID_SIZE/2;
-    int y = _food.y();
-    Shape::drawTriangle(_screen,
-                       x, y,
-                       x - GRID_SIZE/2, y + GRID_SIZE,
-                       x + GRID_SIZE/2, y + GRID_SIZE,
-                       foodColor);
+    for (const auto& food : _foods) {
+        int x = food.x() + GRID_SIZE/2;
+        int y = food.y();
+        Shape::drawTriangle(_screen,
+                           x, y,
+                           x - GRID_SIZE/2, y + GRID_SIZE,
+                           x + GRID_SIZE/2, y + GRID_SIZE,
+                           foodColor);
+    }
 
     // 交换缓冲区
     _screen.swap();
@@ -127,10 +134,16 @@ void Game::render() {
 
 
 void Game::generateFood() {
+    if (_foods.size() >= MAX_FOODS) return;
+
+    Point newFood;
     do {
-        _food.setX((rand() % (WIDTH/GRID_SIZE)) * GRID_SIZE);
-        _food.setY((rand() % (HEIGHT/GRID_SIZE)) * GRID_SIZE);
-    } while (std::find(_snake.begin(), _snake.end(), _food) != _snake.end());
+        newFood.setX((rand() % (WIDTH/GRID_SIZE)) * GRID_SIZE);
+        newFood.setY((rand() % (HEIGHT/GRID_SIZE)) * GRID_SIZE);
+    } while (std::find(_snake.begin(), _snake.end(), newFood) != _snake.end() ||
+             std::find(_foods.begin(), _foods.end(), newFood) != _foods.end());
+
+    _foods.push_back(newFood);
 }
 
 bool Game::checkCollision(const Point& newHead) const {
