@@ -15,6 +15,8 @@ public:
     void clear(uint32_t color);
     void fill_rect(int x, int y, int w, int h, uint32_t color);
     void swap(); // 把 backBuffer 复制到 fb，并等待 VSync
+    int getWidth() const { return _width; }
+    int getHeight() const { return _height; }
     
 private:
     uint32_t* _backBuffer;  // 离屏缓冲

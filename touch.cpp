@@ -55,18 +55,18 @@ TouchEvent::TouchData TouchEvent::getTouchEvent() {
 
             data.pos = currentPos;
             data.dir = analyseDirection(start, end);
-            cout << "touch pos: " << data.pos.x() << " " << data.pos.y() << endl;
-            if (data.dir != None) {
-                cout << "swipe direction: ";
-                switch(data.dir) {
-                    case Left: cout << "Left"; break;
-                    case Right: cout << "Right"; break;
-                    case Up: cout << "Up"; break;
-                    case Down: cout << "Down"; break;
-                    default: break;
-                }
-                cout << endl;
-            }
+            // cout << "touch pos: " << data.pos.x() << " " << data.pos.y() << endl;
+            // if (data.dir != None) {
+            //     cout << "swipe direction: ";
+            //     switch(data.dir) {
+            //         case Left: cout << "Left"; break;
+            //         case Right: cout << "Right"; break;
+            //         case Up: cout << "Up"; break;
+            //         case Down: cout << "Down"; break;
+            //         default: break;
+            //     }
+            //     cout << endl;
+            // }
             return data;
         }
     }

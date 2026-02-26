@@ -2,9 +2,15 @@
 #include "screen.hpp"
 #include "touch.hpp"
 #include <unistd.h>
+#include <stdlib.h>
 
 int main() {
     try {
+        // // 后台播放音乐
+        // if (fork() == 0) {
+        //     execlp("madplay", "madplay", "./1.mp3", NULL);
+        //     exit(0); // 如果exec失败则退出子进程
+        // }
         // 初始化屏幕和触摸
         Screen screen("/dev/fb0");
         TouchEvent touch;

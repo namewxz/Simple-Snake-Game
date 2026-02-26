@@ -1,6 +1,7 @@
 #include "game.hpp"
 #include "color.hpp"
 #include "shape.hpp"
+#include "word.hpp"
 #include <algorithm>
 
 #include <unistd.h>
@@ -28,6 +29,7 @@ void Game::init() {
     _snake.push_back(Point(GAME_WIDTH/2, HEIGHT/2));
     _currentDir = Direction::Right;
     _score = 0;
+    _totalScore = 0;
     _foods.clear();
     for (int i = 0; i < _maxFoods; i++) {
         generateFood();
@@ -123,7 +125,12 @@ void Game::update() {
     // 检查是否吃到食物
     auto foodIt = std::find(_foods.begin(), _foods.end(), newHead);
     if (foodIt != _foods.end()) {
-        _score++;
+        // 计算单个食物得分并累加
+        float speedFactor = (300000.0f - _speed) / (300000.0f - 50000.0f) * 2.0f + 1.0f;
+        float foodFactor = 10.0f / _foods.size();
+        _score = 1 * speedFactor * foodFactor;
+        _totalScore += _score;
+        
         _foods.erase(foodIt);
         generateFood();
     } else {
@@ -165,7 +172,17 @@ void Game::render() {
     }
     // 绘制菜单背景
     _menuBackground.draw(_screen, GAME_WIDTH, 0);
-    // 绘制菜单按钮 30x30 黄色
+    
+    // 绘制得分区背景 (在按钮上方，y从380到408)
+    _screen.fill_rect(611, 380, 176, 35, 0x333333); // 灰色背景
+    
+    // 显示累计总得分 (使用WordDisplay类)
+    printf("Displaying total score: %d\n", _totalScore);
+    char scoreText[32];
+    snprintf(scoreText, sizeof(scoreText), "%d", _totalScore);
+    WordDisplay::displayNumber(_screen, 620, 380, 24, 35, _totalScore, 0x00FF00);
+    
+    // 绘制菜单按钮 30x30 黄色 (保持原有按钮位置)
     _screen.fill_rect(611, 428, 30, 30, 0xFFFF00);
     _screen.fill_rect(659, 428, 30, 30, 0xFFFF00);
     _screen.fill_rect(709, 428, 30, 30, 0xFFFF00);

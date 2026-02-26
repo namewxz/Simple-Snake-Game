@@ -1,0 +1,43 @@
+#include "word.hpp"
+#include "screen.hpp"
+#include "color.hpp"
+#include <iostream>
+#include <unistd.h>
+
+int main() {
+    try {
+        // Initialize screen
+        Screen screen("/dev/fb0");
+        screen.clear(0x000000); // Clear with black
+        
+        // Test displayWord with NUM_1_FONT
+        std::cout << "Displaying number 1 character..." << std::endl;
+        WordDisplay::displayWord(screen, 100, 100, 16, 19, WordDisplay::NUM_1_FONT, 0xFF0000);
+        screen.swap();
+        sleep(1);
+
+        // Test displayNumber
+        std::cout << "Displaying number 123..." << std::endl;
+        WordDisplay::displayNumber(screen, 200, 100, 24, 35, 123, Color(0, 255, 0).value());
+        screen.swap();
+        sleep(1);
+
+        // Test splitAndDisplayNumber
+        std::cout << "Splitting and displaying number 4567..." << std::endl;
+        WordDisplay::splitAndDisplayNumber(screen, 4567, 200);
+        screen.swap();
+        sleep(1);
+
+        // Test displayWord with NAME_FU_FONT
+        std::cout << "Displaying name character 'Fu'..." << std::endl;
+        WordDisplay::displayWord(screen, 300, 100, 24, 20, WordDisplay::NAME_FU_FONT, Color(0, 0, 255).value());
+        screen.swap();
+        sleep(1);
+
+        std::cout << "All tests completed successfully." << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return 1;
+    }
+    return 0;
+}

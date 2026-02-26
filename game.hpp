@@ -38,7 +38,8 @@ private:
     std::vector<Point> _snake;
     std::vector<Point> _foods;
     Direction _currentDir;
-    int _score;
+    int _score; // 当前食物得分
+    int _totalScore = 0; // 累计总得分
     std::mutex _mutex;
     std::thread _inputThread;
     bool _running;
