@@ -1,0 +1,53 @@
+#include "touch.hpp"
+#include "point.hpp"
+#include <iostream>
+
+void testPoint() {
+    std::cout << "=== Testing Point class ===" << std::endl;
+    
+    Point p1;
+    Point p2(10, 20);
+    
+    std::cout << "p1: (" << p1.x() << ", " << p1.y() << ")" << std::endl;
+    std::cout << "p2: (" << p2.x() << ", " << p2.y() << ")" << std::endl;
+    
+    p1.setX(5);
+    p1.setY(15);
+    std::cout << "After set: p1: (" << p1.x() << ", " << p1.y() << ")" << std::endl;
+    
+    p1.move(30, 40);
+    std::cout << "After move: p1: (" << p1.x() << ", " << p1.y() << ")" << std::endl;
+    
+    std::cout << "Distance between p1 and p2: " << p1.distance(p2) << std::endl;
+}
+
+void testTouchEvent() {
+    std::cout << "\n=== Testing TouchEvent class ===" << std::endl;
+    
+    try {
+        TouchEvent touch;
+        
+        std::cout << "Testing getPos() - touch the screen..." << std::endl;
+        Point pos = touch.getPos();
+        std::cout << "Touch position: (" << pos.x() << ", " << pos.y() << ")" << std::endl;
+        
+        std::cout << "Testing direction() - swipe on the screen..." << std::endl;
+        Direction dir = touch.direction();
+        std::cout << "Direction: ";
+        switch(dir) {
+            case Up: std::cout << "Up"; break;
+            case Down: std::cout << "Down"; break;
+            case Left: std::cout << "Left"; break;
+            case Right: std::cout << "Right"; break;
+        }
+        std::cout << std::endl;
+    } catch(const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+    }
+}
+
+int main() {
+    testPoint();
+    testTouchEvent();
+    return 0;
+}

@@ -1,0 +1,87 @@
+#include "screen.hpp"
+#include "dir.hpp"
+#include "bitmap.hpp"
+#include "touch.hpp"
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <unistd.h>
+#include <iterator>
+#include <iostream>
+
+// 检查文件是否为BMP
+bool isBmpFile(const std::string &filename) {
+    return filename.size() > 4 && 
+           filename.substr(filename.size() - 4) == ".bmp";
+}
+
+int main() {
+    try {
+        // 初始化屏幕和触摸
+        Screen screen("/dev/fb0");
+        TouchEvent touch;
+        
+        // 获取BMP文件列表
+        Dir dir("./bmps");
+        auto files = dir.getAllPathFiles();
+        std::vector<std::string> bmpFiles;
+        
+        // 过滤BMP文件
+        for (auto it = files.begin(); it != files.end(); ++it) {
+            if (isBmpFile(*it)) {
+                bmpFiles.push_back(*it);
+            }
+        }
+        
+        if (bmpFiles.empty()) {
+            std::cerr << "No BMP files found in ./bmps directory" << std::endl;
+            return 1;
+        }
+        
+        // 排序文件
+        std::sort(bmpFiles.begin(), bmpFiles.end());
+        
+        // 显示第一张图片
+        int currentIndex = 0;
+        Bitmap currentBmp(bmpFiles[currentIndex]);
+        currentBmp.draw(screen);
+        
+        // 主循环
+        while (true) {
+            // 如果只有一张图片，不处理滑动
+            if (bmpFiles.size() <= 1) {
+                usleep(300000);
+                continue;
+            }
+            
+            Direction dir = touch.direction();
+            
+            switch (dir) {
+                case Up:
+                case Left:
+                    // 上一张
+                    currentIndex = (currentIndex - 1 + bmpFiles.size()) % bmpFiles.size();
+                    break;
+                case Down:
+                case Right:
+                    // 下一张
+                    currentIndex = (currentIndex + 1) % bmpFiles.size();
+                    break;
+                default:
+                    continue;
+            }
+            
+            // 显示新图片
+            currentBmp = Bitmap(bmpFiles[currentIndex]);
+            currentBmp.draw(screen);
+            
+            // 防止过快切换
+            usleep(300000); // 300ms
+        }
+    } catch (const std::exception &e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return 1;
+    }
+    
+    return 0;
+}
