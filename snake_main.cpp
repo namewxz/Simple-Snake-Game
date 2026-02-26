@@ -17,8 +17,8 @@ int main() {
         // 渲染
         game.render();
         
-        // 控制帧率
-        usleep(150000); // 150ms (约6.5 FPS)
+        // 使用Game类中的_speed控制帧率
+        usleep(game.getSpeed());
             
             // 检查游戏结束
             if (game.getState() == Game::State::GAME_OVER) {

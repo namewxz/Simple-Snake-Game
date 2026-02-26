@@ -2,6 +2,7 @@
 #include "color.hpp"
 #include "shape.hpp"
 #include <algorithm>
+
 #include <unistd.h>
 
 Game::Game(Screen& screen) : 
@@ -28,7 +29,7 @@ void Game::init() {
     _currentDir = Direction::Right;
     _score = 0;
     _foods.clear();
-    for (int i = 0; i < MAX_FOODS; i++) {
+    for (int i = 0; i < _maxFoods; i++) {
         generateFood();
     }
     _state = State::PLAYING;
@@ -46,12 +47,53 @@ void Game::handleInput(Direction dir) {
 
 void Game::handleTouchInput() {
     while (_running) {
-        Direction dir = _touch.direction();
-        if (dir != Direction::None) {
+        auto touchData = _touch.getTouchEvent();
+        
+        // 处理方向输入
+        if (touchData.dir != Direction::None) {
             std::lock_guard<std::mutex> lock(_mutex);
-            handleInput(dir);
+            handleInput(touchData.dir);
         }
-        usleep(10000); // 10ms间隔
+
+        // 处理按钮点击
+        if (touchData.pos.y() >= 428 && touchData.pos.y() <= 458) { // 确保Y轴在按钮范围内
+            std::lock_guard<std::mutex> lock(_mutex);
+            
+            // 按钮1: 增加速度 (611,428)-(641,458)
+            if (touchData.pos.x() >= 611 && touchData.pos.x() <= 641) {
+                _speed -= 20000; // 减少20ms
+                if (_speed < 50000) _speed = 50000; // 最小50ms
+                printf("Speed increased to %d ms\n", _speed/1000);
+            }
+            // 按钮2: 减少速度 (659,428)-(689,458)
+            else if (touchData.pos.x() >= 659 && touchData.pos.x() <= 689) {
+                _speed += 20000; // 增加20ms
+                if (_speed > 300000) _speed = 300000; // 最大300ms
+                printf("Speed decreased to %d ms\n", _speed/1000);
+            }
+            // 按钮3: 增加食物 (709,428)-(739,458)
+            else if (touchData.pos.x() >= 709 && touchData.pos.x() <= 739) {
+                if (_maxFoods < 10) {
+                    _maxFoods++;
+                    // 立即补充一个新食物
+                    generateFood();
+                    printf("Food increased to %d\n", _maxFoods);
+                }
+            }
+            // 按钮4: 减少食物 (757,428)-(787,458)
+            else if (touchData.pos.x() >= 757 && touchData.pos.x() <= 787) {
+                if (_maxFoods > 1) {
+                    _maxFoods--;
+                    // 移除最后一个食物
+                    if (!_foods.empty()) {
+                        _foods.pop_back();
+                    }
+                    printf("Food decreased to %d\n", _maxFoods);
+                }
+            }
+        }
+
+        usleep(5000); // 5ms间隔提高响应速度
     }
 }
 
@@ -59,7 +101,7 @@ void Game::update() {
     std::lock_guard<std::mutex> lock(_mutex);
     if (_state != State::PLAYING) return;
 
-    printf("Updating snake position, current direction: %d\n", static_cast<int>(_currentDir));
+    //printf("Updating snake position, current direction: %d\n", static_cast<int>(_currentDir));
     // 自动移动蛇
     Point newHead = _snake.front();
     switch(_currentDir) {
@@ -90,7 +132,7 @@ void Game::update() {
 }
 
 void Game::render() {
-    printf("Rendering frame - snake size: %zu\n", _snake.size());
+    //printf("Rendering frame - snake size: %zu\n", _snake.size());
     _screen.clear(0); // 清屏为黑色
 
     // 绘制蛇
@@ -123,6 +165,11 @@ void Game::render() {
     }
     // 绘制菜单背景
     _menuBackground.draw(_screen, GAME_WIDTH, 0);
+    // 绘制菜单按钮 30x30 黄色
+    _screen.fill_rect(611, 428, 30, 30, 0xFFFF00);
+    _screen.fill_rect(659, 428, 30, 30, 0xFFFF00);
+    _screen.fill_rect(709, 428, 30, 30, 0xFFFF00);
+    _screen.fill_rect(757, 428, 30, 30, 0xFFFF00);
     // 交换缓冲区
     _screen.swap();
 
@@ -133,7 +180,7 @@ void Game::render() {
         // 清屏并显示游戏结束图片
         _screen.clear(0);
         Bitmap gameOverBmp("./bmps/my_game_over.bmp");
-        gameOverBmp.draw(_screen, 0, 0);
+        gameOverBmp.draw(_screen);
         _screen.swap();
         return; // 不再绘制其他内容
     }
@@ -141,7 +188,7 @@ void Game::render() {
 
 
 void Game::generateFood() {
-    if (_foods.size() >= MAX_FOODS) return;
+    if (_foods.size() >= _maxFoods) return;
 
     Point newFood;
     do {

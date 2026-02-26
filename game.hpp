@@ -24,6 +24,7 @@ public:
     void render();
     void handleInput(Direction dir);
     State getState() const { return _state; }
+    int getSpeed() const { return _speed; }
 
 private:
     void handleTouchInput();
@@ -42,12 +43,13 @@ private:
     std::thread _inputThread;
     bool _running;
     Bitmap _menuBackground; // 菜单背景图
+    int _speed = 150000; // 初始速度 (ms)
+    int _maxFoods = 3; // 最大食物数量
     static const int GRID_SIZE = 20;
     static const int GAME_WIDTH = 600; // 游戏区域宽度
     static const int UI_WIDTH = 200;   // UI区域宽度
     static const int WIDTH = GAME_WIDTH + UI_WIDTH; // 总宽度800
     static const int HEIGHT = 480;
-    static const int MAX_FOODS = 3; // 同时存在的最大食物数量
 };
 
 #endif
