@@ -1,5 +1,6 @@
 #include "game.hpp"
 #include "color.hpp"
+#include "shape.hpp"
 #include <algorithm>
 #include <unistd.h>
 
@@ -88,13 +89,30 @@ void Game::render() {
 
     // 绘制蛇
     Color snakeColor(0, 255, 0); // 绿色
-    for (const auto& segment : _snake) {
-        _screen.fill_rect(segment.x(), segment.y(), GRID_SIZE, GRID_SIZE, snakeColor.value());
+    for (size_t i = 0; i < _snake.size(); i++) {
+        if (i == 0) {
+            // 蛇头 - 红色圆形
+            Color headColor(255, 0, 0);
+            Shape::drawCircle(_screen, 
+                             _snake[i].x() + GRID_SIZE/2, 
+                             _snake[i].y() + GRID_SIZE/2, 
+                             GRID_SIZE/2, 
+                             headColor);
+        } else {
+            // 蛇身 - 绿色矩形
+            _screen.fill_rect(_snake[i].x(), _snake[i].y(), GRID_SIZE, GRID_SIZE, snakeColor.value());
+        }
     }
 
-    // 绘制食物
-    Color foodColor(255, 0, 0); // 红色
-    _screen.fill_rect(_food.x(), _food.y(), GRID_SIZE, GRID_SIZE, foodColor.value());
+    // 绘制食物 - 蓝色三角形
+    Color foodColor(0, 0, 255);
+    int x = _food.x() + GRID_SIZE/2;
+    int y = _food.y();
+    Shape::drawTriangle(_screen,
+                       x, y,
+                       x - GRID_SIZE/2, y + GRID_SIZE,
+                       x + GRID_SIZE/2, y + GRID_SIZE,
+                       foodColor);
 
     // 交换缓冲区
     _screen.swap();
